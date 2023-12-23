@@ -6,9 +6,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.Select;
+
+import java.time.Duration;
 
 public class MainApp {
-   private static final String TEST_REG_NUMBER = "2020ugec047";
+   private static final String TEST_REG_NUMBER = "2020ugec40";
+   private static final String TEST_SEMESTER = "VII";
 
     public static void main(String[] args) {
         //init the Driver
@@ -35,16 +39,14 @@ public class MainApp {
 
         //Click Submit
         submitBtn.click();
+
+        //Wait for alert dialog to come
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3L));
         Alert alert = driver.switchTo().alert();
         alert.accept();
 
         //Wait for Page to Change
-        try{
-            driver.wait(1000L);
-        }catch (Exception exception){
-            System.out.println("YOYO: We faced an exception= ");
-            exception.printStackTrace();
-        }
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3L));
 
         //Now Login to Website
         WebElement usernameTextInput2 = driver.findElement(By.id(Constants.USERNAME_TEXT_INPUT_ID));
@@ -54,8 +56,12 @@ public class MainApp {
         passwordTextInput.sendKeys(Constants.UNIVERSAL_NEW_PASS_VALUE);
         submitBtn2.click();
 
-        //Download results
-
+        //Show Result for given Sem
+        WebElement semesterInputBox = driver.findElement(By.id(Constants.SELECT_SEMESTER_DROPDOWN_BOX_ID));
+        WebElement showResultBtn = driver.findElement(By.id(Constants.SHOW_RESULT_BTN_ID));
+        Select selectSemester = new Select(semesterInputBox);
+        selectSemester.selectByVisibleText(TEST_SEMESTER);
+        showResultBtn.click();
 
     }
 }
