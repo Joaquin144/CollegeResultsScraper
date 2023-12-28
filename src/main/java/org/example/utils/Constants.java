@@ -24,11 +24,17 @@ public class Constants {
     //Results Page
     public static final String SELECT_SEMESTER_DROPDOWN_BOX_ID = "ddlSemester";
     public static final String SHOW_RESULT_BTN_ID = "btnimgShowResult";
+    public static final String STUDENT_NAME_LABEL_ID = "lblStudentName";
+    public static final String STUDENT_CGPA_LABEL_ID = "lblCPI";
+    public static final String STUDENT_RESULT_LABEL_ID = "lblResult";
+    public static final String LOGOUT_BTN_ID = "lnklogout";
 
     //College Related Constants
     public static final List<String> collegeBranchCodes = Arrays.asList("cs", "ec", "ee", "mm", "me", "ce", "pi");
     public static final List<String> collegeYears = Arrays.asList("2020");
     public static final List<String> collegeCourses = Arrays.asList("ug");
-    public static final int MAX_ROLL_NUMBER_EXPECTED = 130;//just a random guess that no class would have as many students
+    public static final int MAX_ROLL_NUMBER_EXPECTED = 100;//just a random guess that no class would have as many students
+
+    public static final String OUTPUT_FILE_PATH = "output.xslx";
 
 }
