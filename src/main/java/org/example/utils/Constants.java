@@ -1,5 +1,9 @@
 package org.example.utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class Constants {
     public static final String BASE_URL = "http://117.252.249.5/StudentPortal/default.aspx/";
 
@@ -20,4 +24,11 @@ public class Constants {
     //Results Page
     public static final String SELECT_SEMESTER_DROPDOWN_BOX_ID = "ddlSemester";
     public static final String SHOW_RESULT_BTN_ID = "btnimgShowResult";
+
+    //College Related Constants
+    public static final List<String> collegeBranchCodes = Arrays.asList("cs", "ec", "ee", "mm", "me", "ce", "pi");
+    public static final List<String> collegeYears = Arrays.asList("2020");
+    public static final List<String> collegeCourses = Arrays.asList("ug");
+    public static final int MAX_ROLL_NUMBER_EXPECTED = 130;//just a random guess that no class would have as many students
+
 }

