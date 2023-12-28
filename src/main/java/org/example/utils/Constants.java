@@ -1,6 +1,5 @@
 package org.example.utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,6 +12,7 @@ public class Constants {
     public static final String FORGOT_PSWD_TEXT_LABEL_ID = "lblforgetpass";
     public static final String PASSWORD_TEXT_INPUT_ID = "txt_password";
     public static final String BTN_SUBMIT_LOGINPAGE_ID = "btnSubmit";
+    public static final String BACK_BTN_ID = "btnback";
 
     //Forgot Password Page
     public static final String USERNAME_TEXT_INPUT_ID = "txt_username";
@@ -33,8 +33,13 @@ public class Constants {
     public static final List<String> collegeBranchCodes = Arrays.asList("cs", "ec", "ee", "mm", "me", "ce", "pi");
     public static final List<String> collegeYears = Arrays.asList("2020");
     public static final List<String> collegeCourses = Arrays.asList("ug");
-    public static final int MAX_ROLL_NUMBER_EXPECTED = 100;//just a random guess that no class would have as many students
+    public static final int MAX_ROLL_NUMBER_EXPECTED = 124;//just a random guess that no class would have as many students
 
+    //Output
     public static final String OUTPUT_FILE_PATH = "output.xslx";
+
+    //Server Messages
+    public static final String USER_NOT_EXISTS_MSG = "Server UnAvailable";
+    public static final String USER_LEFT_COLLEGE_MSG = "Please Select Semester";
 
 }

@@ -4,11 +4,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.example.exceptions.UserNotExistsException;
 import org.example.utils.Constants;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.Select;
 
@@ -34,6 +32,7 @@ public class MainApp {
     private void init() {
         //init the Driver
         driver = new ChromeDriver();
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(1L));
 
         //init Workbook and Sheet
         workbook = new XSSFWorkbook();
@@ -69,10 +68,21 @@ public class MainApp {
         for (int rollNumber = 1; rollNumber <= Constants.MAX_ROLL_NUMBER_EXPECTED; rollNumber++) {
             String formattedRollNumber = String.format("%03d", rollNumber);
             String registrationNumber = generateRegistrationNumber(year, courseCode, branchCode, formattedRollNumber);
-            resetPasswordToOurValue(registrationNumber);
+            try {
+                resetPasswordToOurValue(registrationNumber);
+            } catch (UserNotExistsException e) {
+                //Ignore this user and carry on
+                moveToPreviousPage();
+                continue;
+            }
             loginUser(registrationNumber);
-            showResultsForUser(registrationNumber);
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
+            try {
+                showResultsForUser(registrationNumber);
+            } catch (NoSuchElementException exception) {
+                //For students who were in college and quit after some time:--
+                logoutUser();
+                continue;
+            }
 
             // Locate the elements corresponding to lblStudentName, lblCPI, and lblResult
             WebElement studentNameElement = driver.findElement(By.id(Constants.STUDENT_NAME_LABEL_ID));
@@ -106,12 +116,16 @@ public class MainApp {
         }
     }
 
-    private void showResultsForUser(String registrationNumber) {
+    private void showResultsForUser(String registrationNumber) throws NoSuchElementException {
         //Show Result for given Sem
         WebElement semesterInputBox = driver.findElement(By.id(Constants.SELECT_SEMESTER_DROPDOWN_BOX_ID));
         WebElement showResultBtn = driver.findElement(By.id(Constants.SHOW_RESULT_BTN_ID));
         Select selectSemester = new Select(semesterInputBox);
-        selectSemester.selectByVisibleText(TEST_SEMESTER);
+        try{
+            selectSemester.selectByVisibleText(TEST_SEMESTER);
+        }catch (NoSuchElementException exception){//The User didn't register for this semester
+            throw exception;
+        }
         showResultBtn.click();
     }
 
@@ -129,8 +143,7 @@ public class MainApp {
         return year + courseCode + branchCode + formattedRollNumber;
     }
 
-    private void resetPasswordToOurValue(String registrationNumber) {
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
+    private void resetPasswordToOurValue(String registrationNumber) throws UserNotExistsException {
 
         //Forgot Password
         WebElement forgotPasswordTextLabel = driver.findElement(By.id(Constants.FORGOT_PSWD_TEXT_LABEL_ID));
@@ -148,20 +161,23 @@ public class MainApp {
         //Click Submit
         submitBtn.click();
 
-        //Wait for alert dialog to come
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
         Alert alert = driver.switchTo().alert();
-        alert.accept();
-
-        //Wait for Page to Change
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
+        String alertText = alert.getText();
+        if (alertText.equals(Constants.USER_NOT_EXISTS_MSG)) {
+            alert.accept();
+            throw new UserNotExistsException();
+        } else {
+            alert.accept();
+        }
     }
 
     private void logoutUser() {
         WebElement logoutBtnElement = driver.findElement(By.id(Constants.LOGOUT_BTN_ID));
         logoutBtnElement.click();
+    }
 
-        //Wait for Page to Change
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(60L));
+    private void moveToPreviousPage() {
+        WebElement backBtnElement = driver.findElement(By.id(Constants.BACK_BTN_ID));
+        backBtnElement.click();
     }
 }
